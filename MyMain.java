@@ -13,9 +13,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Main {
+public class MyMain {
 
   public static final String DEFAULT_DIR = "./test";
+  public static int version;
 
   public static List<String> readWordList(BufferedReader input) throws IOException {
     LinkedList<String> list = new LinkedList<String>();
@@ -39,7 +40,14 @@ public class Main {
     List<String> wordList = readWordList(stdin);
     String word;
     while ((word = stdin.readLine()) != null) {
-      ClosestWordsV3 closestWords = new ClosestWordsV3(word, wordList);
+      ClosestWordsInterface closestWords;
+      if(version == 2) {
+        closestWords = new ClosestWordsV2(word, wordList);
+      } else if(version == 3) {
+        closestWords = new ClosestWordsV3(word, wordList);
+      } else {
+        closestWords = new ClosestWords(word, wordList); // Default to original
+      }
       System.out.print(word + " (" + closestWords.getMinDistance() + ")");
       for (String w : closestWords.getClosestWords())
         System.out.print(" " + w);
@@ -51,22 +59,23 @@ public class Main {
   }
 
   private static boolean parseArgs(String[] args) {
+    MyMain.version = Integer.parseInt(args[0]);
     boolean inTestZone = false;
     boolean beenInTestZone = false;
     int finishedTestBatches = 0;
-    if (args.length >= 1) {
-      for (String current: args) {
-        if (current.equals("-t")) {
+    if (args.length >= 2) {
+      for (int i = 1; i < args.length; i++) {
+        if (args[i].equals("-t")) {
           inTestZone = true;
           beenInTestZone = true;
           continue;
         }
         if (inTestZone) {
-          if (current.startsWith("-")) {
+          if (args[i].startsWith("-")) {
             inTestZone = false;
             continue;
           }
-          runTestsInCatalogue(current);
+          runTestsInCatalogue(args[i]);
           finishedTestBatches += 1;
         }
       }
@@ -127,7 +136,14 @@ public class Main {
       String word;
     try {
       while ((word = inFile.readLine()) != null) {
-        ClosestWordsV3 closestWords = new ClosestWordsV3(word, wordList);
+        ClosestWordsInterface closestWords;
+        if(version == 2) {
+          closestWords = new ClosestWordsV2(word, wordList);
+        } else if(version == 3) {
+          closestWords = new ClosestWordsV3(word, wordList);
+        } else {
+            closestWords = new ClosestWords(word, wordList); // Default to original
+        }
         String answerLine;
         if ((answerLine = ansFile.readLine()) == null) {
           System.err.println("The file " + ans + " ran out of answers but there were questions left in " + in + ".");
