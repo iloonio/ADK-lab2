@@ -17,21 +17,6 @@ public class ClosestWords {
   int closestDistance = -1;
 
     /**
-     * creates a matrix which will be used in wagnerFischer function for
-     * determining distance of two strings.
-     * We use 40 as the 2nd parameter for making the matrix. this is because we will never have to make the matrix
-     * bigger than that, as given by the assignment!
-     * @param l1 length of the first word
-     * @return a distance matrix ready for wagnerFischer.
-     */
-  int[][] prepMatrix(int l1){
-      int[][] d = new int[l1+1][41];
-      for (int i = 0; i <= l1; i++) d[i][0] = i;
-      for (int j = 0; j <= 40; j++) d[0][j] = j;
-      return d;
-  }
-
-    /**
      * WagnerFischer uses flood filling to compute distances, which is
      * more efficient than the pre-existing recursive approach. More can be read
      * here: <a href="https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm">Wagner-Fischer Algorithm</a>
@@ -39,30 +24,25 @@ public class ClosestWords {
      * @param w2 word 2, typically from a dictionary given by ClosestWords
      * @return a distance matrix for word 1 and 2.
      */
-  int wagnerFischerDistance(String w1, String w2){
-      int[][] d = prepMatrix(w1.length());
-      int subCost;
+    int wagnerFischerDistance(String w1, String w2) {
+        //first, prep matrix. In java, matrices are initialized with a default value (unlike C++)
+        int[][] d = new int[w1.length()+1][w2.length()+1];
+        for (int i = 0; i <= w1.length(); i++) d[i][0] = i;
+        for (int j = 0; j <= w2.length(); j++) d[0][j] = j;
 
-      // loop starts at i,j = 1 because index 0 is already filled with values
-      // this also avoids out-of-bounds issues.
-      for(int j = 1; j <= w1.length(); j++){
-          for(int i = 1; i <= w2.length(); i++){
-              if(w1.charAt(i) == w2.charAt(j)){
-                subCost = 0;
-              } else {
-                  subCost = 1;
-              }
-              //gives the smallest of the 3 values.
-              d[i][j] = Math.min(Math.min(
-                                d[i-1][j] + 1,          //delete
-                                d[i][j-1] + 1),         //add
-                                d[i-1][j-1] + subCost   //substitute (
-              );
-          }
-      }
+        for (int i = 1; i <= w1.length(); i++) {
+            for (int j = 1; j <= w2.length(); j++) {
+                int cost = (w1.charAt(i-1) == w2.charAt(j-1)) ? 0 : 1;    //trinary op to save space & memory B)
+                d[i][j] = Math.min(Math.min(
+                                        d[i-1][j] + 1,      //addition
+                                        d[i][j-1] + 1),     //deletion
+                                        d[i-1][j-1] + cost  //substitution
+                );
+            }
+        }
 
-      return d[w1.length()+1][w2.length()+1];
-  }
+        return d[w1.length()][w2.length()];
+    }
 
   int distance(String w1, String w2) {
     return wagnerFischerDistance(w1, w2);

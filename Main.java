@@ -18,6 +18,12 @@ public class Main {
 
   public static final String DEFAULT_DIR = "./test";
 
+    /**
+     * THIS COULD BE IMPROVED BY CONVERTING THE DICT INTO A TRIE. WOULD SAVE TIME ON READING PREFIXES.
+     * @param input
+     * @return
+     * @throws IOException
+     */
   public static List<String> readWordList(BufferedReader input) throws IOException {
     LinkedList<String> list = new LinkedList<String>();
     while (true) {
