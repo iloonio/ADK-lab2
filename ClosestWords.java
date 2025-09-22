@@ -16,7 +16,6 @@ public class ClosestWords {
 
   int closestDistance = -1;
 
-
     /**
      * creates a matrix which will be used in wagnerFischer function for
      * determining distance of two strings.
@@ -26,23 +25,9 @@ public class ClosestWords {
      * @return a distance matrix ready for wagnerFischer.
      */
   int[][] prepMatrix(int l1){
-      int[][] d = new int[l1][40];
-
-      // initially set values to 0.
-      for(int i = 0; i < l1; i++){
-          for(int j = 0; j < 40; j++){
-              d[i][j] = 0;
-          }
-      }
-      // Set values to str splice length (0 through l1). This is because for an empty string vs splice, the
-      // distance to the string is always determined by the splice length.
-      for(int i = 0; i < l1; i++){
-          d[i][0] = i;
-      }
-      for(int i = 0; i < 40; i++){
-          d[0][i] = i;
-      }
-
+      int[][] d = new int[l1+1][41];
+      for (int i = 0; i <= l1; i++) d[i][0] = i;
+      for (int j = 0; j <= 40; j++) d[0][j] = j;
       return d;
   }
 
@@ -54,12 +39,14 @@ public class ClosestWords {
      * @param w2 word 2, typically from a dictionary given by ClosestWords
      * @return a distance matrix for word 1 and 2.
      */
-  int[][] wagnerFischer(String w1, String w2){
+  int wagnerFischerDistance(String w1, String w2){
       int[][] d = prepMatrix(w1.length());
       int subCost;
 
-      for(int j = 0; j < w1.length(); j++){
-          for(int i = 0; i < w2.length(); i++){
+      // loop starts at i,j = 1 because index 0 is already filled with values
+      // this also avoids out-of-bounds issues.
+      for(int j = 1; j <= w1.length(); j++){
+          for(int i = 1; i <= w2.length(); i++){
               if(w1.charAt(i) == w2.charAt(j)){
                 subCost = 0;
               } else {
@@ -67,34 +54,19 @@ public class ClosestWords {
               }
               //gives the smallest of the 3 values.
               d[i][j] = Math.min(Math.min(
-                                d[i-1][j] + 1,
-                                d[i][j-1] + 1),
-                                d[i-1][j-1] + subCost
+                                d[i-1][j] + 1,          //delete
+                                d[i][j-1] + 1),         //add
+                                d[i-1][j-1] + subCost   //substitute (
               );
           }
       }
 
-      return d;
-  }
-
-  int partDist(String w1, String w2, int w1len, int w2len) {
-    if (w1len == 0)
-      return w2len;
-    if (w2len == 0)
-      return w1len;
-    int res = partDist(w1, w2, w1len - 1, w2len - 1) + 
-	(w1.charAt(w1len - 1) == w2.charAt(w2len - 1) ? 0 : 1);
-    int addLetter = partDist(w1, w2, w1len - 1, w2len) + 1;
-    if (addLetter < res)
-      res = addLetter;
-    int deleteLetter = partDist(w1, w2, w1len, w2len - 1) + 1;
-    if (deleteLetter < res)
-      res = deleteLetter;
-    return res;
+      return d[w1.length()+1][w2.length()+1];
   }
 
   int distance(String w1, String w2) {
-    return partDist(w1, w2, w1.length(), w2.length());
+    return wagnerFischerDistance(w1, w2);
+    //return partDist(w1, w2, w1.length(), w2.length());
   }
 
   public ClosestWords(String w, List<String> wordList) {
